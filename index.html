@@ -1,0 +1,974 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="data:," />
+    <title>传奇挂机小游戏</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        --bg:#0c0906;
+        --bg2:#14100a;
+        --panel:#1b150d;
+        --panel2:#241b10;
+        --line:#4a3a1c;
+        --gold:#d4af37;
+        --gold-bright:#f3d67b;
+        --gold-dim:#9a7f2e;
+        --red:#c0392b;
+        --red-bright:#e74c3c;
+        --ink:#e8dcc0;
+        --ink-dim:#a89878;
+        --hp:#c22f24;
+        --mp:#2456a6;
+        --exp:#7a9a2e;
+        --good:#8bc34a;
+      }
+      *{ box-sizing:border-box; }
+      html,body{ margin:0; padding:0; }
+      body{
+        background:
+          radial-gradient(1200px 500px at 50% -10%, #2a1e0d 0%, transparent 60%),
+          linear-gradient(180deg, var(--bg2), var(--bg));
+        color:var(--ink);
+        font-family:"Noto Sans SC", system-ui, sans-serif;
+        min-height:100vh;
+      }
+      button{ font-family:inherit; cursor:pointer; min-height:2.25rem; }
+      .wrap{ max-width:960px; margin:0 auto; padding:14px 14px 40px; }
+
+      /* ---------- 顶栏 ---------- */
+      .topbar{
+        display:flex; flex-wrap:wrap; gap:10px; align-items:stretch; justify-content:space-between;
+        border:1px solid var(--line); background:linear-gradient(180deg,#221a0f,#171208);
+        padding:10px 14px; margin-bottom:12px;
+      }
+      .brand{ display:flex; flex-direction:column; justify-content:center; }
+      .brand h1{
+        margin:0; font-family:"Noto Serif SC", serif; font-weight:900; font-size:26px;
+        letter-spacing:4px; color:var(--gold-bright);
+        text-shadow:0 0 14px rgba(212,175,55,.35), 0 2px 0 #5c430a;
+      }
+      .brand small{ color:var(--ink-dim); font-size:12px; letter-spacing:2px; margin-top:2px; }
+      .stat-chips{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+      .chip{
+        border:1px solid var(--line); background:#100c07; padding:6px 12px; min-width:86px;
+        display:flex; flex-direction:column; align-items:center;
+      }
+      .chip b{ font-size:17px; color:var(--gold-bright); font-variant-numeric:tabular-nums; line-height:1.15; }
+      .chip span{ font-size:11px; color:var(--ink-dim); letter-spacing:1px; }
+
+      /* ---------- 通用面板 ---------- */
+      .panel{
+        border:1px solid var(--line);
+        background:linear-gradient(180deg, var(--panel2), var(--panel));
+        padding:14px; margin-bottom:12px;
+        box-shadow:inset 0 0 0 1px #0a0703, 0 4px 14px rgba(0,0,0,.45);
+      }
+      .panel h2{
+        margin:0 0 10px; font-family:"Noto Serif SC", serif; font-size:16px; letter-spacing:3px;
+        color:var(--gold); border-bottom:1px solid var(--line); padding-bottom:8px;
+        display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap;
+      }
+      .panel h2 .sub{ font-family:"Noto Sans SC",sans-serif; font-size:12px; color:var(--ink-dim); letter-spacing:0; font-weight:400; }
+
+      /* ---------- 选职业 ---------- */
+      #startScreen{ padding-top:10px; }
+      .intro{ text-align:center; margin:8px 0 18px; }
+      .intro .big{
+        font-family:"Noto Serif SC",serif; font-weight:900; font-size:34px; letter-spacing:8px;
+        color:var(--gold-bright); text-shadow:0 0 18px rgba(212,175,55,.4);
+      }
+      .intro p{ color:var(--ink-dim); margin:8px 0 0; font-size:14px; }
+      .cls-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+      .cls-card{
+        border:1px solid var(--line); background:linear-gradient(180deg,#251c10,#171208);
+        padding:16px 14px; text-align:left; color:var(--ink); width:100%;
+      }
+      .cls-card:hover{ border-color:var(--gold-dim); }
+      .cls-card .glyph{
+        font-family:"Noto Serif SC",serif; font-weight:900; font-size:40px; line-height:1;
+        width:64px; height:64px; display:flex; align-items:center; justify-content:center;
+        border:1px solid var(--gold-dim); color:var(--gold-bright);
+        background:radial-gradient(circle at 50% 35%, #3a2a10, #171106);
+        margin-bottom:10px;
+      }
+      .cls-card h3{ margin:0 0 6px; font-family:"Noto Serif SC",serif; font-size:20px; letter-spacing:2px; color:var(--gold-bright); }
+      .cls-card p{ margin:0 0 10px; font-size:13px; color:var(--ink-dim); line-height:1.6; min-height:42px; }
+      .cls-card ul{ margin:0; padding:0; list-style:none; font-size:12.5px; line-height:1.9; color:var(--ink); }
+      .cls-card ul b{ color:var(--gold); font-variant-numeric:tabular-nums; }
+      .cls-card .pick{
+        display:block; margin-top:12px; text-align:center; padding:8px;
+        border:1px solid var(--red); color:#ffd9d4; background:linear-gradient(180deg,#7e1f16,#5c130c);
+        font-weight:700; letter-spacing:3px; font-size:14px;
+      }
+      .resume-box{ text-align:center; margin-bottom:16px; }
+      .resume-box .row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+
+      /* ---------- 按钮 ---------- */
+      .btn{
+        border:1px solid var(--gold-dim); background:linear-gradient(180deg,#3a2c12,#241a09);
+        color:var(--gold-bright); padding:8px 14px; font-size:14px; font-weight:700; letter-spacing:1px;
+      }
+      .btn:hover{ border-color:var(--gold); }
+      .btn:disabled{ opacity:.42; cursor:not-allowed; }
+      .btn.red{ border-color:#7e2a22; background:linear-gradient(180deg,#7e1f16,#571209); color:#ffd9d4; }
+      .btn.ghost{ background:#100c07; color:var(--ink-dim); border-color:var(--line); font-weight:500; }
+      .btn.danger-armed{ background:linear-gradient(180deg,#a02c1e,#6d1409); color:#fff; border-color:#ff7a6b; }
+
+      /* ---------- 主游戏布局 ---------- */
+      .game-grid{ display:grid; grid-template-columns:1.25fr 1fr; gap:12px; align-items:start; }
+      .game-grid .panel{ margin-bottom:12px; }
+
+      /* 条 */
+      .bar-row{ display:flex; align-items:center; gap:8px; margin:6px 0; font-size:12.5px; }
+      .bar-row .lab{ width:34px; color:var(--ink-dim); letter-spacing:1px; flex:none; }
+      .bar{ flex:1; height:16px; background:#0a0703; border:1px solid var(--line); position:relative; overflow:hidden; }
+      .bar i{ display:block; height:100%; transition:width .35s ease; }
+      .bar.hp i{ background:linear-gradient(180deg,#e05548,#8f1d12); }
+      .bar.mp i{ background:linear-gradient(180deg,#4a7fd4,#1d3f78); }
+      .bar.exp{ height:12px; }
+      .bar.exp i{ background:linear-gradient(180deg,#a8c95a,#5c7a1e); }
+      .bar-row .num{ min-width:104px; text-align:right; font-variant-numeric:tabular-nums; color:var(--ink); flex:none; }
+      .hero-line{ display:flex; flex-wrap:wrap; gap:6px 16px; font-size:13px; color:var(--ink-dim); margin-top:8px; }
+      .hero-line b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+      .hero-line .gold{ color:var(--gold-bright); }
+
+      /* 战斗舞台 */
+      .stage{
+        position:relative; border:1px solid var(--line); background:
+          radial-gradient(420px 200px at 50% 0%, rgba(212,175,55,.10), transparent 70%),
+          linear-gradient(180deg,#191209,#0e0a05);
+        padding:18px 14px 14px; text-align:center; overflow:hidden; min-height:238px;
+      }
+      .stage.boss{ border-color:#7e2a22; background:
+          radial-gradient(420px 220px at 50% 0%, rgba(192,57,43,.22), transparent 70%),
+          linear-gradient(180deg,#1d0d08,#0e0705); }
+      .mob-seal{
+        width:104px; height:104px; margin:2px auto 10px;
+        display:flex; align-items:center; justify-content:center;
+        font-family:"Noto Serif SC",serif; font-weight:900; font-size:52px; color:var(--gold-bright);
+        border:2px solid var(--gold-dim);
+        background:radial-gradient(circle at 50% 32%, #3d2c10, #150f06 75%);
+        box-shadow:0 0 22px rgba(212,175,55,.18), inset 0 0 18px rgba(0,0,0,.7);
+        user-select:none;
+      }
+      .stage.boss .mob-seal{ color:#ffb3a7; border-color:#a03a2c; box-shadow:0 0 26px rgba(231,76,60,.35), inset 0 0 18px rgba(0,0,0,.7); }
+      .mob-name{ font-family:"Noto Serif SC",serif; font-size:21px; font-weight:700; letter-spacing:3px; }
+      .stage.boss .mob-name{ color:#ff9d8f; }
+      .mob-meta{ font-size:12.5px; color:var(--ink-dim); margin:4px 0 8px; }
+      .stage .bar-row{ max-width:420px; margin-left:auto; margin-right:auto; }
+      .boss-tag{
+        display:inline-block; border:1px solid #a03a2c; color:#ffb3a7; background:#3a0f08;
+        font-size:12px; padding:2px 10px; letter-spacing:2px; margin-bottom:8px;
+      }
+      .float-dmg{
+        position:absolute; font-weight:900; font-size:19px; pointer-events:none;
+        text-shadow:0 1px 2px #000; animation:floatUp 0.9s ease-out forwards; z-index:3;
+        font-variant-numeric:tabular-nums;
+      }
+      .float-dmg.hurt{ color:#ff8a7a; }
+      .float-dmg.hit{ color:var(--gold-bright); }
+      .float-dmg.crit{ color:#ffcf3f; font-size:25px; }
+      .float-dmg.heal{ color:#9be15d; }
+      @keyframes floatUp{ 0%{ opacity:0; transform:translateY(6px);} 15%{opacity:1;} 100%{ opacity:0; transform:translateY(-44px);} }
+      .dead-note{ color:#ff9d8f; font-size:14px; padding:26px 0; line-height:1.8; }
+
+      /* 日志 */
+      .log{
+        height:168px; overflow-y:auto; font-size:12.5px; line-height:1.75; color:var(--ink-dim);
+        background:#0a0703; border:1px solid var(--line); padding:8px 10px;
+      }
+      .log div b{ color:var(--ink); }
+      .log .lg-gold{ color:var(--gold-bright); }
+      .log .lg-boss{ color:#ff9d8f; }
+      .log .lg-lv{ color:var(--good); }
+      .log .lg-bad{ color:#ff8a7a; }
+
+      /* 地图 */
+      .map-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+      .map-btn{
+        border:1px solid var(--line); background:#100c07; color:var(--ink); text-align:left;
+        padding:10px 12px; width:100%;
+      }
+      .map-btn .mn{ font-family:"Noto Serif SC",serif; font-size:16px; font-weight:700; letter-spacing:2px; display:block; }
+      .map-btn .md{ font-size:12px; color:var(--ink-dim); display:block; margin-top:3px; line-height:1.5; }
+      .map-btn.active{ border-color:var(--gold); background:linear-gradient(180deg,#33260e,#1d1507); }
+      .map-btn.active .mn{ color:var(--gold-bright); }
+      .map-btn.locked{ opacity:.55; cursor:not-allowed; }
+      .boss-progress{ margin-top:10px; font-size:12.5px; color:var(--ink-dim); }
+      .boss-progress .bar{ height:10px; margin-top:5px; }
+      .boss-progress .bar i{ background:linear-gradient(180deg,#e05548,#8f1d12); }
+
+      /* 商店 / 装备 */
+      .shop-row{
+        display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px dashed #33270f;
+      }
+      .shop-row:last-child{ border-bottom:none; }
+      .shop-row .info{ flex:1; min-width:0; }
+      .shop-row .info .t{ font-size:14.5px; font-weight:700; }
+      .shop-row .info .t .own{ color:var(--gold-bright); font-variant-numeric:tabular-nums; }
+      .shop-row .info .d{ font-size:12px; color:var(--ink-dim); margin-top:2px; line-height:1.5; }
+      .shop-row .acts{ display:flex; gap:6px; flex:none; }
+      .equip-next{ font-size:12.5px; color:var(--ink-dim); }
+      .equip-next b{ color:var(--gold-bright); }
+
+      .foot-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
+      .hint{ font-size:12px; color:var(--ink-dim); line-height:1.7; }
+
+      /* 弹窗 */
+      .modal-mask{
+        position:fixed; inset:0; background:rgba(0,0,0,.72); display:none;
+        align-items:center; justify-content:center; padding:18px; z-index:50;
+      }
+      .modal-mask.show{ display:flex; }
+      .modal{
+        max-width:420px; width:100%; border:1px solid var(--gold-dim);
+        background:linear-gradient(180deg,#251c10,#150f07); padding:22px 20px; text-align:center;
+        box-shadow:0 10px 40px rgba(0,0,0,.6);
+      }
+      .modal h3{ margin:0 0 6px; font-family:"Noto Serif SC",serif; letter-spacing:3px; color:var(--gold-bright); font-size:20px; }
+      .modal p{ color:var(--ink-dim); font-size:13.5px; line-height:1.8; margin:6px 0; }
+      .modal .gain{ font-size:16px; color:var(--ink); }
+      .modal .gain b{ color:var(--gold-bright); font-variant-numeric:tabular-nums; }
+      .modal .btn{ margin-top:12px; }
+
+      .hidden{ display:none !important; }
+
+      @media (max-width:760px){
+        .cls-grid{ grid-template-columns:1fr; }
+        .cls-card p{ min-height:0; }
+        .game-grid{ grid-template-columns:1fr; }
+        .brand h1{ font-size:22px; }
+        .chip{ min-width:70px; padding:5px 8px; }
+        .chip b{ font-size:15px; }
+        .bar-row .num{ min-width:88px; font-size:11.5px; }
+        .intro .big{ font-size:27px; letter-spacing:5px; }
+      }
+      @media (prefers-reduced-motion: reduce){
+        .float-dmg{ animation:none; opacity:0; }
+        .bar i{ transition:none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+
+      <!-- 顶栏数据 -->
+      <div class="topbar">
+        <div class="brand">
+          <h1>传奇 · 挂机</h1>
+          <small>玛法大陆 · 自动征战</small>
+        </div>
+        <div class="stat-chips">
+          <div class="chip"><b id="chipLevel">-</b><span>等级</span></div>
+          <div class="chip"><b id="chipClass">-</b><span>职业</span></div>
+          <div class="chip"><b id="chipGold">0</b><span>金币</span></div>
+          <div class="chip"><b id="chipKills">0</b><span>杀怪数</span></div>
+          <div class="chip"><b id="chipBoss">0</b><span>Boss 击杀</span></div>
+        </div>
+      </div>
+
+      <!-- 选职业 -->
+      <section id="startScreen">
+        <div class="intro">
+          <div class="big">再 战 玛 法</div>
+          <p>选择你的职业，自动打怪、打金、升级装备，祖玛教主在寺庙深处等你。</p>
+        </div>
+        <div class="resume-box panel hidden" id="resumeBox">
+          <h2 style="border:none; margin:0; justify-content:center;">已有存档</h2>
+          <p class="hint" id="resumeInfo" style="margin-top:6px;"></p>
+          <div class="row">
+            <button class="btn" id="btnContinue" type="button">继续游戏</button>
+            <button class="btn ghost" id="btnWipe" type="button">删除存档</button>
+          </div>
+        </div>
+        <div class="cls-grid" id="clsGrid"></div>
+        <p class="hint" style="text-align:center; margin-top:14px;">进度自动保存在本机浏览器里；关掉页面再回来，会按离线时间结算挂机收益（最多 8 小时）。</p>
+      </section>
+
+      <!-- 游戏主界面 -->
+      <section id="gameScreen" class="hidden">
+        <div class="game-grid">
+          <div>
+            <!-- 角色 -->
+            <div class="panel">
+              <h2><span id="heroTitle">勇士</span><span class="sub" id="heroPower"></span></h2>
+              <div class="bar-row"><span class="lab">生命</span><div class="bar hp"><i id="hpBar" style="width:100%"></i></div><span class="num" id="hpNum">0 / 0</span></div>
+              <div class="bar-row"><span class="lab">魔法</span><div class="bar mp"><i id="mpBar" style="width:100%"></i></div><span class="num" id="mpNum">0 / 0</span></div>
+              <div class="bar-row"><span class="lab">经验</span><div class="bar exp"><i id="expBar" style="width:0%"></i></div><span class="num" id="expNum">0 / 0</span></div>
+              <div class="hero-line">
+                <span>攻击 <b id="stAtk">0</b></span>
+                <span>防御 <b id="stDef">0</b></span>
+                <span>武器 <b class="gold" id="stWeapon">木剑</b></span>
+                <span>防具 <b class="gold" id="stArmor">布衣</b></span>
+                <span>红药 <b id="stRed">0</b></span>
+                <span>蓝药 <b id="stBlue">0</b></span>
+              </div>
+            </div>
+
+            <!-- 战斗 -->
+            <div class="panel">
+              <h2>战场<span class="sub" id="stageMapName"></span></h2>
+              <div class="stage" id="stage">
+                <div id="mobBox">
+                  <div id="bossTag" class="boss-tag hidden">BOSS 降临</div>
+                  <div class="mob-seal" id="mobSeal">怪</div>
+                  <div class="mob-name" id="mobName">—</div>
+                  <div class="mob-meta" id="mobMeta"></div>
+                  <div class="bar-row"><span class="lab">生命</span><div class="bar hp"><i id="mobHpBar" style="width:100%"></i></div><span class="num" id="mobHpNum">0 / 0</span></div>
+                </div>
+                <div id="deadBox" class="dead-note hidden">你已阵亡，正在比奇城休整复活……<br /><span id="deadCount"></span></div>
+              </div>
+              <div class="boss-progress">
+                距 Boss 祖玛教主降临：已击杀 <b id="bossProgNum" style="color:var(--gold-bright)">0</b> / <span id="bossProgMax">30</span> 只怪
+                <div class="bar"><i id="bossProgBar" style="width:0%"></i></div>
+              </div>
+            </div>
+
+            <!-- 日志 -->
+            <div class="panel">
+              <h2>战斗日志</h2>
+              <div class="log" id="log"></div>
+            </div>
+          </div>
+
+          <div>
+            <!-- 地图 -->
+            <div class="panel">
+              <h2>地图<span class="sub">点击切换练级地点</span></h2>
+              <div class="map-grid" id="mapGrid"></div>
+            </div>
+
+            <!-- 药店 -->
+            <div class="panel">
+              <h2>药店<span class="sub">战斗中自动喝药</span></h2>
+              <div class="shop-row">
+                <div class="info">
+                  <div class="t">金创药（红） <span class="own">× <span id="ownRed">0</span></span></div>
+                  <div class="d">生命低于 35% 时自动使用，恢复 45% 生命。单价 <b style="color:var(--gold-bright)">50</b> 金币</div>
+                </div>
+                <div class="acts">
+                  <button class="btn" id="buyRed1" type="button">买 1</button>
+                  <button class="btn" id="buyRed10" type="button">买 10</button>
+                </div>
+              </div>
+              <div class="shop-row">
+                <div class="info">
+                  <div class="t">魔法药（蓝） <span class="own">× <span id="ownBlue">0</span></span></div>
+                  <div class="d">魔法低于 25% 时自动使用，恢复 55% 魔法。单价 <b style="color:var(--gold-bright)">40</b> 金币</div>
+                </div>
+                <div class="acts">
+                  <button class="btn" id="buyBlue1" type="button">买 1</button>
+                  <button class="btn" id="buyBlue10" type="button">买 10</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 铁匠铺 -->
+            <div class="panel">
+              <h2>铁匠铺<span class="sub">用金币升级装备</span></h2>
+              <div class="shop-row">
+                <div class="info">
+                  <div class="t">武器：<span class="own" id="eqWeaponName">木剑</span></div>
+                  <div class="d" id="eqWeaponDesc"></div>
+                </div>
+                <div class="acts"><button class="btn red" id="btnUpWeapon" type="button">升级</button></div>
+              </div>
+              <div class="shop-row">
+                <div class="info">
+                  <div class="t">防具：<span class="own" id="eqArmorName">布衣</span></div>
+                  <div class="d" id="eqArmorDesc"></div>
+                </div>
+                <div class="acts"><button class="btn red" id="btnUpArmor" type="button">升级</button></div>
+              </div>
+              <p class="hint">装备共 10 档，从木剑布衣一路升到开天、雷霆战甲。等级和装备跟不上时，先回低级地图攒金币更稳。</p>
+            </div>
+
+            <div class="foot-actions">
+              <button class="btn ghost" id="btnSave" type="button">立即存档</button>
+              <button class="btn ghost" id="btnReset" type="button">删档重开</button>
+            </div>
+            <p class="hint" id="saveHint">进度每 5 秒自动保存到本机。</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 离线收益弹窗 -->
+    <div class="modal-mask" id="offlineMask">
+      <div class="modal">
+        <h3>离线挂机收益</h3>
+        <p id="offlineText"></p>
+        <p class="gain" id="offlineGain"></p>
+        <button class="btn" id="btnOfflineOk" type="button">收下，继续战斗</button>
+      </div>
+    </div>
+
+    <script>
+    (function(){
+      "use strict";
+      var SAVE_KEY = "cq_guaji_save_v1";
+      var BOSS_EVERY = 30;
+      var TICK_MS = 900;
+      var OFFLINE_CAP_SEC = 8 * 3600;
+      var RED_PRICE = 50, BLUE_PRICE = 40;
+
+      /* ---------------- 数据 ---------------- */
+      var CLASSES = {
+        warrior: { name:"战士", glyph:"战", desc:"血厚攻高，近战之王。烈火剑法偶尔打出爆发伤害，站得住才打得久。",
+          hp:130, mp:30, atk:15, def:6, hpG:24, mpG:3, atkG:3.4, defG:1.5, mpCost:0 },
+        mage:    { name:"法师", glyph:"法", desc:"魔法攻击全场最高，一发雷电术伤害惊人；但血薄皮脆，全靠药水撑。",
+          hp:72, mp:120, atk:19, def:2, hpG:11, mpG:15, atkG:4.6, defG:0.6, mpCost:6 },
+        taoist:  { name:"道士", glyph:"道", desc:"攻防均衡，自带治愈术，每回合回复生命，最省药、最耐耗的挂机职业。",
+          hp:100, mp:75, atk:13, def:4, hpG:16, mpG:9, atkG:2.8, defG:1.1, mpCost:0 }
+      };
+
+      var MAPS = [
+        { name:"比奇城野外", unlock:1, desc:"鸡、鹿与稻草人，新手练级地",
+          monsters:[
+            { name:"鸡",     hp:22,  atk:3,  gold:6,   exp:8 },
+            { name:"鹿",     hp:34,  atk:4,  gold:9,   exp:12 },
+            { name:"稻草人", hp:48,  atk:6,  gold:14,  exp:18 },
+            { name:"半兽人", hp:70,  atk:9,  gold:22,  exp:28 }
+          ]},
+        { name:"骷髅洞", unlock:5, desc:"阴气森森，骷髅成群",
+          monsters:[
+            { name:"骷髅战士",   hp:120, atk:13, gold:38,  exp:48 },
+            { name:"洞蛆",       hp:95,  atk:16, gold:34,  exp:44 },
+            { name:"骷髅弓箭手", hp:110, atk:18, gold:46,  exp:58 },
+            { name:"毒蜘蛛",     hp:150, atk:21, gold:58,  exp:72 }
+          ]},
+        { name:"僵尸矿洞", unlock:10, desc:"废弃矿洞，尸气冲天",
+          monsters:[
+            { name:"爬行僵尸", hp:240, atk:26, gold:85,  exp:110 },
+            { name:"矿工僵尸", hp:300, atk:31, gold:105, exp:135 },
+            { name:"僵尸法师", hp:270, atk:38, gold:125, exp:160 },
+            { name:"尸王",     hp:430, atk:42, gold:190, exp:230 }
+          ]},
+        { name:"祖玛寺庙", unlock:16, desc:"教主老巢，高风险高回报",
+          monsters:[
+            { name:"祖玛卫士",   hp:520,  atk:52, gold:210, exp:280 },
+            { name:"祖玛雕像",   hp:640,  atk:58, gold:250, exp:330 },
+            { name:"祖玛弓箭手", hp:560,  atk:66, gold:285, exp:380 },
+            { name:"极品祖玛卫士", hp:820, atk:74, gold:400, exp:520 }
+          ]}
+      ];
+
+      var WEAPONS = [
+        { name:"木剑",     atk:2,  cost:0 },
+        { name:"铁剑",     atk:6,  cost:150 },
+        { name:"青铜斧",   atk:11, cost:420 },
+        { name:"修罗战斧", atk:17, cost:1050 },
+        { name:"炼狱",     atk:25, cost:2500 },
+        { name:"井中月",   atk:35, cost:5800 },
+        { name:"裁决之杖", atk:48, cost:12500 },
+        { name:"骨玉权杖", atk:64, cost:27000 },
+        { name:"龙纹剑",   atk:84, cost:56000 },
+        { name:"开天",     atk:110, cost:125000 }
+      ];
+      var ARMORS = [
+        { name:"布衣",     def:1,  hp:0,    cost:0 },
+        { name:"轻型盔甲", def:3,  hp:25,   cost:160 },
+        { name:"中型盔甲", def:6,  hp:60,   cost:480 },
+        { name:"重盔甲",   def:10, hp:120,  cost:1150 },
+        { name:"战神盔甲", def:15, hp:210,  cost:2700 },
+        { name:"恶魔长袍", def:21, hp:330,  cost:6200 },
+        { name:"幽灵战衣", def:28, hp:500,  cost:13500 },
+        { name:"圣战宝甲", def:37, hp:740,  cost:29000 },
+        { name:"天魔神甲", def:48, hp:1080, cost:62000 },
+        { name:"雷霆战甲", def:62, hp:1560, cost:135000 }
+      ];
+
+      /* ---------------- 状态 ---------------- */
+      var state = null;
+      var mob = null;
+      var deadTicks = 0;
+      var started = false;
+
+      function $(id){ return document.getElementById(id); }
+      function rnd(a,b){ return a + Math.random()*(b-a); }
+      function irnd(a,b){ return Math.floor(rnd(a,b+1)); }
+      function fmt(n){ return Math.floor(n).toLocaleString("zh-CN"); }
+
+      function expNeed(level){ return Math.floor(60 * Math.pow(level, 1.55)) + 40; }
+
+      function stats(){
+        var c = CLASSES[state.cls], L = state.level;
+        var w = WEAPONS[state.weapon], a = ARMORS[state.armor];
+        return {
+          maxHp: Math.round(c.hp + c.hpG*(L-1) + a.hp),
+          maxMp: Math.round(c.mp + c.mpG*(L-1)),
+          atk:   Math.round(c.atk + c.atkG*(L-1) + w.atk),
+          def:   Math.round(c.def + c.defG*(L-1) + a.def)
+        };
+      }
+
+      function newState(cls){
+        var s = { cls:cls, level:1, exp:0, gold:120, kills:0, bossKills:0,
+                  map:0, weapon:0, armor:0, red:5, blue:3,
+                  hp:1, mp:1, sinceBoss:0, lastTime:Date.now() };
+        state = s;
+        var st = stats();
+        s.hp = st.maxHp; s.mp = st.maxMp;
+        return s;
+      }
+
+      function save(){
+        if(!state) return;
+        state.lastTime = Date.now();
+        try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(e){}
+      }
+      function load(){
+        try{
+          var raw = localStorage.getItem(SAVE_KEY);
+          if(!raw) return null;
+          var s = JSON.parse(raw);
+          if(!s || !CLASSES[s.cls]) return null;
+          return s;
+        }catch(e){ return null; }
+      }
+      function wipe(){
+        try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+      }
+
+      /* ---------------- 日志 ---------------- */
+      function log(html, cls){
+        var box = $("log");
+        var div = document.createElement("div");
+        if(cls) div.className = cls;
+        div.innerHTML = html;
+        box.insertBefore(div, box.firstChild);
+        while(box.children.length > 40) box.removeChild(box.lastChild);
+      }
+
+      function floatText(txt, cls){
+        var stage = $("stage");
+        var el = document.createElement("span");
+        el.className = "float-dmg " + cls;
+        el.textContent = txt;
+        el.style.left = (38 + Math.random()*24) + "%";
+        el.style.top = (cls === "hurt" ? "62%" : "30%");
+        stage.appendChild(el);
+        setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 950);
+      }
+
+      /* ---------------- 怪物 ---------------- */
+      function bossStats(){
+        var L = state.level;
+        return { name:"祖玛教主", boss:true,
+          hp: Math.round(420 + L*130), atk: Math.round(14 + L*3.1),
+          gold: Math.round(850 + L*160), exp: Math.round(320 + L*85) };
+      }
+      function spawnMob(){
+        if(state.sinceBoss >= BOSS_EVERY){
+          var b = bossStats();
+          mob = { name:b.name, boss:true, maxHp:b.hp, hp:b.hp, atk:b.atk, gold:b.gold, exp:b.exp };
+          log("<b class='lg-boss'>祖玛教主</b> 降临！寺庙在震动，玛法在颤抖……", "lg-boss");
+        } else {
+          var list = MAPS[state.map].monsters;
+          var m = list[irnd(0, list.length-1)];
+          var hp = Math.round(m.hp * rnd(0.9, 1.1));
+          mob = { name:m.name, boss:false, maxHp:hp, hp:hp,
+                  atk: Math.round(m.atk * rnd(0.9,1.1)),
+                  gold: Math.round(m.gold * rnd(0.85,1.25)),
+                  exp: Math.round(m.exp * rnd(0.9,1.1)) };
+        }
+        renderMob();
+      }
+
+      /* ---------------- 经验 / 升级 ---------------- */
+      function gainExp(n){
+        state.exp += n;
+        var up = 0;
+        while(state.exp >= expNeed(state.level)){
+          state.exp -= expNeed(state.level);
+          state.level++;
+          up++;
+        }
+        if(up > 0){
+          var st = stats();
+          state.hp = st.maxHp; state.mp = st.maxMp;
+          log("恭喜升级！当前等级 <b>" + state.level + "</b> 级，生命魔法全部恢复。", "lg-lv");
+          MAPS.forEach(function(m, i){
+            if(m.unlock === state.level) log("新地图解锁：<b>" + m.name + "</b>（" + m.desc + "）", "lg-lv");
+          });
+          renderMaps();
+        }
+      }
+
+      /* ---------------- 战斗 ---------------- */
+      function drinkIfNeeded(){
+        var st = stats();
+        if(state.hp > 0 && state.hp <= st.maxHp * 0.35 && state.red > 0){
+          state.red--;
+          var heal = Math.round(st.maxHp * 0.45);
+          state.hp = Math.min(st.maxHp, state.hp + heal);
+          log("自动喝下金创药，恢复 <b>+" + heal + "</b> 生命（剩 " + state.red + " 瓶）");
+          floatText("+" + heal, "heal");
+        }
+        if(state.mp <= st.maxMp * 0.25 && state.blue > 0 && CLASSES[state.cls].mpCost > 0 || state.mp <= st.maxMp*0.25 && state.blue > 0 && state.cls === "taoist"){
+          state.blue--;
+          var back = Math.round(st.maxMp * 0.55);
+          state.mp = Math.min(st.maxMp, state.mp + back);
+          log("自动喝下魔法药，恢复 <b>+" + back + "</b> 魔法（剩 " + state.blue + " 瓶）");
+        }
+      }
+
+      function tick(){
+        if(!state || !mob) return;
+        var st = stats();
+
+        if(deadTicks > 0){
+          deadTicks--;
+          $("deadCount").textContent = deadTicks > 0 ? ("还有 " + deadTicks + " 秒复活") : "";
+          if(deadTicks === 0){
+            state.hp = st.maxHp; state.mp = st.maxMp;
+            $("deadBox").classList.add("hidden");
+            $("mobBox").classList.remove("hidden");
+            spawnMob();
+            log("你在比奇城复活，整理行装，再战玛法！");
+          }
+          render();
+          return;
+        }
+
+        /* 玩家攻击 */
+        var c = CLASSES[state.cls];
+        var dmg, crit = false, skill = "";
+        if(c.mpCost > 0){
+          if(state.mp >= c.mpCost){
+            state.mp -= c.mpCost;
+            dmg = st.atk * rnd(0.9, 1.2);
+            skill = "雷电术";
+          } else {
+            dmg = st.atk * 0.45 * rnd(0.85, 1.1);
+            skill = "杖击（魔法不足）";
+          }
+        } else {
+          dmg = st.atk * rnd(0.88, 1.15);
+          skill = state.cls === "warrior" ? "攻杀剑术" : "灵魂火符";
+        }
+        var critChance = state.cls === "warrior" ? 0.16 : 0.09;
+        if(Math.random() < critChance){
+          crit = true;
+          dmg *= state.cls === "warrior" ? 1.9 : 1.6;
+          if(state.cls === "warrior") skill = "烈火剑法";
+        }
+        dmg = Math.max(1, Math.round(dmg));
+        mob.hp -= dmg;
+        floatText("-" + dmg + (crit ? "!" : ""), crit ? "crit" : "hit");
+
+        if(mob.hp <= 0){
+          var wasBoss = mob.boss;
+          state.kills++;
+          if(wasBoss){
+            state.bossKills++;
+            state.sinceBoss = 0;
+            log("<b class='lg-boss'>击杀祖玛教主！</b> 爆出 <span class='lg-gold'>" + fmt(mob.gold) + " 金币</span>，获得 " + fmt(mob.exp) + " 经验！", "lg-boss");
+          } else {
+            state.sinceBoss++;
+            log("击杀 <b>" + mob.name + "</b>（" + skill + (crit ? " 暴击" : "") + " -" + dmg + "），+" + fmt(mob.gold) + " 金币，+" + fmt(mob.exp) + " 经验", "");
+          }
+          state.gold += mob.gold;
+          gainExp(mob.exp);
+          spawnMob();
+          render();
+          return;
+        }
+
+        /* 怪物反击 */
+        var mdmg = Math.max(1, Math.round((mob.atk - st.def * 0.55) * rnd(0.85, 1.15)));
+        state.hp -= mdmg;
+        floatText("-" + mdmg, "hurt");
+
+        /* 道士治愈 */
+        if(state.cls === "taoist" && state.hp > 0){
+          var heal = Math.round(2 + state.level * 0.9);
+          if(state.hp < st.maxHp){
+            state.hp = Math.min(st.maxHp, state.hp + heal);
+          }
+        }
+
+        /* 自动喝药 / 阵亡 */
+        drinkIfNeeded();
+        if(state.hp <= 0){
+          if(state.red > 0){
+            state.red--;
+            state.hp = Math.round(st.maxHp * 0.45);
+            log("<b>千钧一发！</b>自动灌下金创药，从鬼门关爬了回来（剩 " + state.red + " 瓶）", "lg-bad");
+          } else {
+            state.hp = 0;
+            deadTicks = 5;
+            $("mobBox").classList.add("hidden");
+            $("deadBox").classList.remove("hidden");
+            $("deadCount").textContent = "还有 5 秒复活";
+            log("<b>你被 " + mob.name + " 击倒了……</b> 红药已耗尽。买药后再战，或回低级地图攒钱。", "lg-bad");
+          }
+        }
+        render();
+      }
+
+      /* ---------------- 离线收益 ---------------- */
+      function offlineGain(seconds){
+        var map = MAPS[state.map];
+        var avgHp = 0, avgGold = 0, avgExp = 0;
+        map.monsters.forEach(function(m){ avgHp += m.hp; avgGold += m.gold; avgExp += m.exp; });
+        var n = map.monsters.length;
+        avgHp /= n; avgGold /= n; avgExp /= n;
+        var st = stats();
+        var dps = st.atk * 0.95 / (TICK_MS/1000);
+        var ttk = avgHp / Math.max(1, dps);
+        var kills = Math.floor(seconds / (ttk + 1.1) * 0.7);
+        if(kills <= 0) return null;
+        return { kills:kills, gold: Math.round(kills * avgGold), exp: Math.round(kills * avgExp) };
+      }
+
+      /* ---------------- 渲染 ---------------- */
+      function render(){
+        if(!state) return;
+        var st = stats();
+        $("chipLevel").textContent = state.level;
+        $("chipClass").textContent = CLASSES[state.cls].name;
+        $("chipGold").textContent = fmt(state.gold);
+        $("chipKills").textContent = fmt(state.kills);
+        $("chipBoss").textContent = fmt(state.bossKills);
+
+        $("heroTitle").textContent = CLASSES[state.cls].name + " · " + state.level + " 级";
+        $("heroPower").textContent = "战力约 " + fmt(st.atk * 3 + st.def * 2 + st.maxHp / 5);
+        $("hpBar").style.width = Math.max(0, state.hp / st.maxHp * 100) + "%";
+        $("hpNum").textContent = fmt(Math.max(0, state.hp)) + " / " + fmt(st.maxHp);
+        $("mpBar").style.width = Math.max(0, state.mp / st.maxMp * 100) + "%";
+        $("mpNum").textContent = fmt(Math.max(0, state.mp)) + " / " + fmt(st.maxMp);
+        var need = expNeed(state.level);
+        $("expBar").style.width = Math.min(100, state.exp / need * 100) + "%";
+        $("expNum").textContent = fmt(state.exp) + " / " + fmt(need);
+        $("stAtk").textContent = st.atk;
+        $("stDef").textContent = st.def;
+        $("stWeapon").textContent = WEAPONS[state.weapon].name;
+        $("stArmor").textContent = ARMORS[state.armor].name;
+        $("stRed").textContent = state.red;
+        $("stBlue").textContent = state.blue;
+        $("ownRed").textContent = state.red;
+        $("ownBlue").textContent = state.blue;
+
+        $("stageMapName").textContent = MAPS[state.map].name;
+        $("bossProgNum").textContent = Math.min(state.sinceBoss, BOSS_EVERY);
+        $("bossProgMax").textContent = BOSS_EVERY;
+        $("bossProgBar").style.width = Math.min(100, state.sinceBoss / BOSS_EVERY * 100) + "%";
+
+        renderMob();
+        renderShop();
+      }
+
+      function renderMob(){
+        if(!mob) return;
+        $("stage").classList.toggle("boss", !!mob.boss);
+        $("bossTag").classList.toggle("hidden", !mob.boss);
+        $("mobSeal").textContent = mob.name.charAt(0);
+        $("mobName").textContent = mob.name;
+        $("mobMeta").textContent = "攻击 " + mob.atk + " · 掉落约 " + fmt(mob.gold) + " 金币 / " + fmt(mob.exp) + " 经验";
+        $("mobHpBar").style.width = Math.max(0, mob.hp / mob.maxHp * 100) + "%";
+        $("mobHpNum").textContent = fmt(Math.max(0, mob.hp)) + " / " + fmt(mob.maxHp);
+      }
+
+      function renderMaps(){
+        var grid = $("mapGrid");
+        grid.innerHTML = "";
+        MAPS.forEach(function(m, i){
+          var btn = document.createElement("button");
+          btn.type = "button";
+          var locked = state.level < m.unlock;
+          btn.className = "map-btn" + (i === state.map ? " active" : "") + (locked ? " locked" : "");
+          btn.innerHTML = "<span class='mn'>" + m.name + "</span><span class='md'>" +
+            (locked ? ("需 " + m.unlock + " 级解锁 · ") : "已解锁 · ") + m.desc + "</span>";
+          btn.addEventListener("click", function(){
+            if(state.level < m.unlock){ log("等级不足，" + m.name + " 需要 " + m.unlock + " 级才能进入。", "lg-bad"); return; }
+            if(state.map === i) return;
+            state.map = i;
+            state.sinceBoss = Math.min(state.sinceBoss, BOSS_EVERY - 1);
+            spawnMob();
+            log("前往 <b>" + m.name + "</b> 练级。");
+            renderMaps(); render(); save();
+          });
+          grid.appendChild(btn);
+        });
+      }
+
+      function renderShop(){
+        var w = WEAPONS[state.weapon], a = ARMORS[state.armor];
+        $("eqWeaponName").textContent = w.name + "（攻击 +" + w.atk + "）";
+        $("eqArmorName").textContent = a.name + "（防御 +" + a.def + (a.hp ? "，生命 +" + a.hp : "") + "）";
+        var nw = WEAPONS[state.weapon + 1], na = ARMORS[state.armor + 1];
+        if(nw){
+          $("eqWeaponDesc").innerHTML = "下一档 <b>" + nw.name + "</b>：攻击 +" + nw.atk + "，需 <span class='lg-gold' style='color:var(--gold-bright)'>" + fmt(nw.cost) + " 金币</span>";
+          $("btnUpWeapon").disabled = state.gold < nw.cost;
+          $("btnUpWeapon").textContent = "升级（" + fmt(nw.cost) + "）";
+        } else {
+          $("eqWeaponDesc").textContent = "已是最高档武器，玛法大陆无出其右。";
+          $("btnUpWeapon").disabled = true;
+          $("btnUpWeapon").textContent = "已满级";
+        }
+        if(na){
+          $("eqArmorDesc").innerHTML = "下一档 <b>" + na.name + "</b>：防御 +" + na.def + "，生命 +" + na.hp + "，需 <span style='color:var(--gold-bright)'>" + fmt(na.cost) + " 金币</span>";
+          $("btnUpArmor").disabled = state.gold < na.cost;
+          $("btnUpArmor").textContent = "升级（" + fmt(na.cost) + "）";
+        } else {
+          $("eqArmorDesc").textContent = "已是最高档防具，刀枪不入。";
+          $("btnUpArmor").disabled = true;
+          $("btnUpArmor").textContent = "已满级";
+        }
+        $("buyRed1").disabled = state.gold < RED_PRICE;
+        $("buyRed10").disabled = state.gold < RED_PRICE * 10;
+        $("buyBlue1").disabled = state.gold < BLUE_PRICE;
+        $("buyBlue10").disabled = state.gold < BLUE_PRICE * 10;
+      }
+
+      /* ---------------- 开始游戏 ---------------- */
+      function startGame(isNew){
+        $("startScreen").classList.add("hidden");
+        $("gameScreen").classList.remove("hidden");
+        renderMaps();
+        spawnMob();
+        render();
+        if(!started){
+          started = true;
+          setInterval(tick, TICK_MS);
+          setInterval(save, 5000);
+          document.addEventListener("visibilitychange", function(){ if(document.hidden) save(); });
+          window.addEventListener("beforeunload", save);
+        }
+        if(isNew){
+          log("欢迎来到玛法大陆，<b>" + CLASSES[state.cls].name + "</b>！自动战斗已经开始，攒金币、升装备、闯祖玛。");
+        } else {
+          log("欢迎回来，<b>" + CLASSES[state.cls].name + "</b>。自动战斗继续。");
+        }
+      }
+
+      /* ---------------- 选职业界面 ---------------- */
+      function buildStart(){
+        var grid = $("clsGrid");
+        grid.innerHTML = "";
+        Object.keys(CLASSES).forEach(function(key){
+          var c = CLASSES[key];
+          var card = document.createElement("button");
+          card.type = "button";
+          card.className = "cls-card";
+          card.innerHTML =
+            "<span class='glyph'>" + c.glyph + "</span>" +
+            "<h3>" + c.name + "</h3><p>" + c.desc + "</p>" +
+            "<ul><li>生命 <b>" + c.hp + "</b> · 魔法 <b>" + c.mp + "</b></li>" +
+            "<li>攻击 <b>" + c.atk + "</b> · 防御 <b>" + c.def + "</b></li></ul>" +
+            "<span class='pick'>选 " + c.name + " 出战</span>";
+          card.addEventListener("click", function(){
+            newState(key);
+            save();
+            startGame(true);
+          });
+          grid.appendChild(card);
+        });
+
+        var saved = load();
+        if(saved){
+          state = saved;
+          var st = stats();
+          state.hp = Math.min(Math.max(1, state.hp || st.maxHp), st.maxHp);
+          state.mp = Math.min(Math.max(0, state.mp || 0), st.maxMp);
+          $("resumeBox").classList.remove("hidden");
+          $("resumeInfo").textContent = CLASSES[saved.cls].name + " · " + saved.level + " 级 · 金币 " + fmt(saved.gold) +
+            " · 已杀怪 " + fmt(saved.kills) + " · Boss 击杀 " + fmt(saved.bossKills);
+          render();
+        }
+      }
+
+      /* ---------------- 按钮绑定 ---------------- */
+      function buy(kind, count){
+        var price = (kind === "red" ? RED_PRICE : BLUE_PRICE) * count;
+        if(state.gold < price){ log("金币不足，买不起。", "lg-bad"); return; }
+        state.gold -= price;
+        if(kind === "red"){ state.red += count; log("买下金创药 ×" + count + "，花了 " + fmt(price) + " 金币。"); }
+        else { state.blue += count; log("买下魔法药 ×" + count + "，花了 " + fmt(price) + " 金币。"); }
+        render(); save();
+      }
+      $("buyRed1").addEventListener("click", function(){ buy("red", 1); });
+      $("buyRed10").addEventListener("click", function(){ buy("red", 10); });
+      $("buyBlue1").addEventListener("click", function(){ buy("blue", 1); });
+      $("buyBlue10").addEventListener("click", function(){ buy("blue", 10); });
+
+      $("btnUpWeapon").addEventListener("click", function(){
+        var nw = WEAPONS[state.weapon + 1];
+        if(!nw || state.gold < nw.cost) return;
+        state.gold -= nw.cost; state.weapon++;
+        log("武器升级为 <b>" + nw.name + "</b>，攻击 +" + nw.atk + "！", "lg-lv");
+        render(); save();
+      });
+      $("btnUpArmor").addEventListener("click", function(){
+        var na = ARMORS[state.armor + 1];
+        if(!na || state.gold < na.cost) return;
+        state.gold -= na.cost; state.armor++;
+        var st = stats();
+        state.hp = Math.min(st.maxHp, state.hp + na.hp);
+        log("防具升级为 <b>" + na.name + "</b>，防御 +" + na.def + "，生命上限 +" + na.hp + "！", "lg-lv");
+        render(); save();
+      });
+
+      $("btnSave").addEventListener("click", function(){
+        save();
+        $("saveHint").textContent = "已存档（" + new Date().toLocaleTimeString("zh-CN") + "）。进度每 5 秒自动保存到本机。";
+      });
+
+      var resetArmed = false, resetTimer = null;
+      function armReset(btn, fn){
+        if(!resetArmed){
+          resetArmed = true;
+          btn.textContent = "再点一次确认删除";
+          btn.classList.add("danger-armed");
+          resetTimer = setTimeout(function(){
+            resetArmed = false;
+            btn.textContent = btn.id === "btnReset" ? "删档重开" : "删除存档";
+            btn.classList.remove("danger-armed");
+          }, 3000);
+          return;
+        }
+        clearTimeout(resetTimer);
+        fn();
+      }
+      $("btnReset").addEventListener("click", function(){
+        armReset(this, function(){ wipe(); location.reload(); });
+      });
+      $("btnWipe").addEventListener("click", function(){
+        armReset(this, function(){ wipe(); location.reload(); });
+      });
+
+      $("btnContinue").addEventListener("click", function(){
+        var now = Date.now();
+        var awaySec = Math.floor((now - (state.lastTime || now)) / 1000);
+        var gain = null;
+        if(awaySec >= 120) gain = offlineGain(Math.min(awaySec, OFFLINE_CAP_SEC));
+        startGame(false);
+        if(gain && gain.kills > 0){
+          state.kills += gain.kills;
+          state.gold += gain.gold;
+          state.sinceBoss = Math.min(BOSS_EVERY - 1, state.sinceBoss + (gain.kills % BOSS_EVERY));
+          gainExp(gain.exp);
+          var hrs = Math.floor(awaySec / 3600), mins = Math.floor((awaySec % 3600) / 60);
+          $("offlineText").textContent = "你离开的 " + (hrs > 0 ? hrs + " 小时 " : "") + mins + " 分钟里，你的角色一直在" + MAPS[state.map].name + "奋战" + (awaySec > OFFLINE_CAP_SEC ? "（离线收益最多结算 8 小时）" : "") + "。";
+          $("offlineGain").innerHTML = "击杀怪物 <b>" + fmt(gain.kills) + "</b> 只 · 金币 <b>+" + fmt(gain.gold) + "</b> · 经验 <b>+" + fmt(gain.exp) + "</b>";
+          $("offlineMask").classList.add("show");
+          log("离线挂机结算：击杀 " + fmt(gain.kills) + " 只怪，+" + fmt(gain.gold) + " 金币，+" + fmt(gain.exp) + " 经验。", "lg-lv");
+          render(); save();
+        }
+      });
+      $("btnOfflineOk").addEventListener("click", function(){
+        $("offlineMask").classList.remove("show");
+      });
+
+      buildStart();
+    })();
+    </script>
+  </body>
+</html>
